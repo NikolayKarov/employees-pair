@@ -1,0 +1,10 @@
+package com.example.employeespair.repository;
+
+import com.example.employeespair.model.Employee;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+@Repository
+public interface EmployeeRepository extends JpaRepository<Employee, Long> {
+
+}

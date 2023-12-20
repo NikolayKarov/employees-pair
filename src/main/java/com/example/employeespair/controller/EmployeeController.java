@@ -1,11 +1,14 @@
 package com.example.employeespair.controller;
 
 import com.example.employeespair.dto.EmployeeDto;
+import com.example.employeespair.model.Employee;
 import com.example.employeespair.service.EmployeeService;
+import com.example.employeespair.util.CSVParser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -43,6 +46,12 @@ public class EmployeeController {
     @GetMapping("/{id}")
     public ResponseEntity<EmployeeDto> findEmployeeById(@PathVariable Long id) {
         return ResponseEntity.ok(employeeService.findEmployeeById(id));
+    }
+
+    @PostMapping("/longest-pair")
+    public ResponseEntity<String> getLongestWorkingPair(@RequestParam("file") MultipartFile file) {
+        List<Employee> employees = CSVParser.readDataFromCSV(file);
+        return ResponseEntity.ok(employeeService.findLongestWorkingPair(employees).toString());
     }
 
 }

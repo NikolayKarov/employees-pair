@@ -1,6 +1,7 @@
 package com.example.employeespair.service;
 
 import com.example.employeespair.dto.EmployeeDto;
+import com.example.employeespair.exception.EmployeeNotFoundException;
 import com.example.employeespair.model.Employee;
 import com.example.employeespair.model.EmployeePair;
 import com.example.employeespair.repository.EmployeeRepository;
@@ -11,6 +12,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class EmployeeService {
@@ -23,29 +25,31 @@ public class EmployeeService {
 
     public void saveEmployee(EmployeeDto employeeDto) {
         Employee employee = new Employee();
+        employee.setEmployeeId(employeeDto.getEmployeeId());
         employee.setProjectId(employeeDto.getProjectId());
         employee.setDateFrom(employeeDto.getDateFrom());
         employee.setDateTo(employeeDto.getDateTo());
         employeeRepository.save(employee);
     }
 
-    public void deleteEmployeeById(Long id) {
-        if (employeeRepository.existsById(id)) {
-            employeeRepository.deleteById(id);
+    public void deleteEmployeeById(Long employeeId) {
+        if (employeeRepository.existsByEmployeeId(employeeId)) {
+            employeeRepository.deleteByEmployeeId(employeeId);
         } else {
-            throw new RuntimeException("Employee not found");
+            throw new EmployeeNotFoundException("Employee with id: " + employeeId + " not found.");
         }
     }
 
-    public void updateEmployee(Long id, EmployeeDto employeeDto) {
-        Optional<Employee> employee = employeeRepository.findById(id);
+    public void updateEmployee(Long employeeId, EmployeeDto employeeDto) {
+        Optional<Employee> employee = employeeRepository.findById(employeeId);
         if (employee.isPresent()) {
+            employee.get().setEmployeeId(employeeDto.getEmployeeId());
             employee.get().setProjectId(employeeDto.getProjectId());
             employee.get().setDateFrom(employeeDto.getDateFrom());
             employee.get().setDateTo(employeeDto.getDateTo());
             employeeRepository.save(employee.get());
         } else {
-            throw new RuntimeException("Exception");
+            throw new EmployeeNotFoundException("Employee with id: " + employeeId + " not found.");
         }
     }
 
@@ -54,9 +58,10 @@ public class EmployeeService {
                 .map((employee) -> modelMapper.map(employee, EmployeeDto.class)).toList();
     }
 
-    public EmployeeDto findEmployeeById(Long id) {
-        return employeeRepository.findById(id).stream().findFirst()
-                .map((employee) -> modelMapper.map(employee, EmployeeDto.class)).orElseThrow();
+    public List<EmployeeDto> findEmployeeById(Long id) {
+        return employeeRepository.findByEmployeeId(id).stream()
+                .map((element) -> modelMapper.map(element, EmployeeDto.class))
+                .collect(Collectors.toList());
     }
 
     public EmployeePair findLongestWorkingPair(List<Employee> employees) {
@@ -85,6 +90,10 @@ public class EmployeeService {
             }
         }
         return longestWorkingPair;
+    }
+
+    public void saveAll(List<Employee> employees) {
+        employeeRepository.saveAll(employees);
     }
 
     private long calculateDuration(LocalDate firstEmployeeStartDate, LocalDate firstEmployeeEndDate,

@@ -8,6 +8,7 @@ import java.time.LocalDate;
 @Getter
 @Setter
 public class EmployeeDto {
+    private Long employeeId;
     private Long projectId;
     private LocalDate dateFrom;
     private LocalDate dateTo;

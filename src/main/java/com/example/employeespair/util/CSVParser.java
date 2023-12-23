@@ -16,10 +16,7 @@ import static com.example.employeespair.util.DateParser.parseDate;
 public class CSVParser {
 
     public static List<Employee> readDataFromCSV(MultipartFile file) {
-        if (file.isEmpty()) {
-            throw new EmptyFileException("File is empty!");
-        }
-
+        validateFile(file);
         List<Employee> employees = new ArrayList<>();
 
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(file.getInputStream()))) {
@@ -27,7 +24,7 @@ public class CSVParser {
             while ((line = reader.readLine()) != null) {
                 String[] data = line.split(",");
                 Employee employee = new Employee();
-                employee.setId(Long.parseLong(data[0].trim()));
+                employee.setEmployeeId(Long.parseLong(data[0].trim()));
                 employee.setProjectId(Long.parseLong(data[1].trim()));
                 employee.setDateFrom(parseDate(data[2].trim()));
 
@@ -44,5 +41,14 @@ public class CSVParser {
             exception.printStackTrace();
         }
         return employees;
+    }
+
+    private static void validateFile(MultipartFile file) {
+        if (file.isEmpty()) {
+            throw new EmptyFileException("File is empty!");
+        }
+        if (!file.getOriginalFilename().endsWith(".csv")) {
+            throw new UnsupportedOperationException("Unsupported file format.");
+        }
     }
 }

@@ -1,14 +1,10 @@
 package com.example.employeespair.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import jakarta.persistence.*;
+import lombok.*;
 
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Positive;
 import java.time.LocalDate;
 
 @AllArgsConstructor
@@ -20,7 +16,13 @@ public class Employee {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    @NotNull
+    @Positive(message = "Employee ID must be positive number")
+    private Long employeeId;
+    @NotNull
+    @Positive(message = "Project ID must be positive number")
     private Long projectId;
+    @NotNull
     private LocalDate dateFrom;
     private LocalDate dateTo;
 

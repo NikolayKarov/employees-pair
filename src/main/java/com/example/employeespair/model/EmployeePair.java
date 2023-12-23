@@ -18,7 +18,7 @@ public class EmployeePair {
         return String.format("Employee1 id: %d\n" +
                 "Employee2 id: %d\n" +
                 "Project id: %d\n" +
-                "Duration: %d days", employee1.getId(), employee2.getId(), projectId, duration);
+                "Duration: %d days", employee1.getEmployeeId(), employee2.getEmployeeId(), projectId, duration);
     }
 
 }

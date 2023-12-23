@@ -6,6 +6,7 @@ import lombok.*;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Positive;
 import java.time.LocalDate;
+import java.util.Objects;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -26,4 +27,14 @@ public class Employee {
     private LocalDate dateFrom;
     private LocalDate dateTo;
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Employee employee = (Employee) o;
+        return Objects.equals(employeeId, employee.employeeId)
+                && Objects.equals(projectId, employee.projectId)
+                && Objects.equals(dateFrom, employee.dateFrom)
+                && Objects.equals(dateTo, employee.dateTo);
+    }
 }

@@ -67,33 +67,29 @@ public class EmployeeService {
     public EmployeePair findLongestWorkingPair(List<Employee> employees) {
         Map<EmployeePair, Long> pairDurationMap = new HashMap<>();
 
-        for (Employee firstEmployee : employees) {
-            for (Employee secondEmployee : employees) {
-                if (!Objects.equals(firstEmployee.getId(), secondEmployee.getId()) &&
-                        Objects.equals(firstEmployee.getProjectId(), secondEmployee.getProjectId())) {
+        for (int i = 0; i < employees.size(); i++) {
+            for (int j = i + 1; j < employees.size(); j++) {
+                Employee firstEmployee = employees.get(i);
+                Employee secondEmployee = employees.get(j);
+                if (!firstEmployee.getEmployeeId().equals(secondEmployee.getEmployeeId()) &&
+                        firstEmployee.getProjectId().equals(secondEmployee.getProjectId())) {
 
                     long duration = calculateDuration(firstEmployee.getDateFrom(), firstEmployee.getDateTo(),
                             secondEmployee.getDateFrom(), secondEmployee.getDateTo());
 
                     EmployeePair employeePair = new EmployeePair(firstEmployee, secondEmployee, firstEmployee.getProjectId(), duration);
-                    pairDurationMap.put(employeePair, pairDurationMap.getOrDefault(employeePair, employeePair.getDuration() + duration));
+                    pairDurationMap.merge(employeePair, duration, Long::sum);
                 }
             }
         }
-        EmployeePair longestWorkingPair = null;
-        long maxDuration = 0;
-
-        for (Map.Entry<EmployeePair, Long> entry : pairDurationMap.entrySet()) {
-            if (entry.getValue() > maxDuration) {
-                longestWorkingPair = entry.getKey();
-                maxDuration = entry.getValue();
-            }
-        }
-        return longestWorkingPair;
+        return pairDurationMap.entrySet().stream()
+                .max(Map.Entry.comparingByValue())
+                .map(Map.Entry::getKey)
+                .orElse(null);
     }
 
     public void saveAll(List<Employee> employees) {
-        employeeRepository.saveAll(employees);
+        employeeRepository.saveAll(checkForDuplication(employees));
     }
 
     private long calculateDuration(LocalDate firstEmployeeStartDate, LocalDate firstEmployeeEndDate,
@@ -108,5 +104,18 @@ public class EmployeeService {
 
         }
         return duration;
+    }
+
+    private List<Employee> checkForDuplication(List<Employee> employees) {
+        Set<Employee> uniqueEmployees = new HashSet<>();
+        for (Employee employee : employees) {
+            boolean isDuplicate = employeeRepository.findByEmployeeId(employee.getEmployeeId()).stream()
+                    .anyMatch(existingEmployee -> existingEmployee.equals(employee));
+
+            if (!isDuplicate) {
+                uniqueEmployees.add(employee);
+            }
+        }
+        return new ArrayList<>(uniqueEmployees);
     }
 }
